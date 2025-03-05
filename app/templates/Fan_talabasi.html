@@ -35,16 +35,21 @@
         <ul class="list-group">
         <li class="list-group-item active" aria-current="true">Fan</li>
             <li class="list-group-item">
-                <a href="#" class="text-decoration-none text-dark">
+                <a href="{% url 'Fan_talabasi' fan.pk %}" class="text-decoration-none text-dark">
                     {{ fan.nom }}
                 </a>
+                <a href="{% url 'upd_fan' fan.id %}" class="btn btn-warning">Tahrirlash</a>
+                <form method="post" action="{% url 'del_fan' fan.id %}" style="display: inline;" onsubmit="return confirm('{{ fan.fan }} fanini o‘chirishni tasdiqlaysizmi?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">O‘chirish</button>
+                </form>
             </li>
       </ul>
       </div>
 
       <div class="col-md-9">
             <div class="row">
-                {% for item in talaba %}
+                {% for item in Talaba %}
                     <div class="col-md-4 mb-3">
                         <div class="card">
                             <h5 class="card-header">Talaba ma'lumoti:</h5>
@@ -54,6 +59,7 @@
                               <p class="card-text">Fani: {{item.fan}}</p>
                                <a href="{% url 'Talaba' item.id %}" class="btn btn-primary">Batafsil</a>
                                <a href="{% url 'download_talaba_pdf' item.id %}" class="btn btn-success">PDF yuklash</a>
+
                              </div>
                         </div>
                     </div>
