@@ -1,5 +1,6 @@
 from tempfile import template
 
+from django.urls import reverse_lazy
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from io import BytesIO
@@ -70,72 +71,102 @@ class Talaba_haqida(DetailView):
     context_object_name = 'talaba'
     pk_url_kwarg = "talaba_id"
 
-def add_talaba(request):
-    if request.method == 'POST':
-        form = TalabaForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('asosiy')
-    else:
-        form = TalabaForm()
-    context = {'form': form}
-    print("Context:", context)  # Terminalda context chiqadi
-    return render(request, "add_talaba.html", context)
+# def add_talaba(request):
+#     if request.method == 'POST':
+#         form = TalabaForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('asosiy')
+#     else:
+#         form = TalabaForm()
+#     context = {'form': form}
+#     return render(request, "add_talaba.html", context)
 
-def del_talaba(request, talaba_id):
-    talaba = get_object_or_404(Talaba, id=talaba_id)
-    if request.method == 'POST':
-        talaba.delete()
-        messages.success(request, f"{talaba.ism_fam} muvaffaqiyatli o‘chirildi!")
-        return redirect('asosiy')
-    return redirect('asosiy')
+class add_talaba(CreateView):
+    model = Talaba
+    template_name = 'add_talaba.html'
+    form_class = TalabaForm
+    success_url = reverse_lazy('asosiy')
 
-def upd_talaba(request, talaba_id):
-    talaba = get_object_or_404(Talaba, id=talaba_id)
-    if request.method == 'POST':
-        form = TalabaForm(request.POST, instance=talaba)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f"{talaba.ism_fam} muvaffaqiyatli yangilandi!")
-            return redirect('asosiy')
-    else:
-        form = TalabaForm(instance=talaba)
-    context = {'form': form, 'talaba': talaba}
-    return render(request, 'upd_fan.html', context)
+# def del_talaba(request, talaba_id):
+#     talaba = get_object_or_404(Talaba, id=talaba_id)
+#     if request.method == 'POST':
+#         talaba.delete()
+#         messages.success(request, f"{talaba.ism_fam} muvaffaqiyatli o‘chirildi!")
+#         return redirect('asosiy')
+#     return redirect('asosiy')
 
-def add_fan(request):
-    if request.method == 'POST':
-        form = FanForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Fan muvaffaqiyatli qo'shildi!")
-            return redirect('asosiy')
-    else:
-        form = FanForm()
-    context = {'form': form}
-    return render(request, 'add_fan.html', context)
+class del_talaba(DeleteView):
+    model = Talaba
+    success_url = reverse_lazy('asosiy')
 
+# def upd_talaba(request, talaba_id):
+#     talaba = get_object_or_404(Talaba, id=talaba_id)
+#     if request.method == 'POST':
+#         form = TalabaForm(request.POST, instance=talaba)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, f"{talaba.ism_fam} muvaffaqiyatli yangilandi!")
+#             return redirect('asosiy')
+#     else:
+#         form = TalabaForm(instance=talaba)
+#     context = {'form': form, 'talaba': talaba}
+#     return render(request, 'upd_fan.html', context)
 
-def del_fan(request, fan_id):
-    fan = get_object_or_404(Fan, id=fan_id)
-    if request.method == 'POST':
-        fan.delete()
-        messages.success(request, f"{fan.nom} fani muvaffaqiyatli o‘chirildi!")
-        return redirect('asosiy')
-    return redirect('asosiy')
+class upd_talaba(UpdateView):
+    model = Talaba
+    form_class = TalabaForm
+    template_name = 'upd_talaba.html'
+    success_url = reverse_lazy(asosiy)
 
-def upd_fan(request, fan_id):
-    fan = get_object_or_404(Fan, id=fan_id)
-    if request.method == 'POST':
-        form = FanForm(request.POST, instance=fan)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Fan muvaffaqiyatli yangilandi!")
-            return redirect('asosiy')
-    else:
-        form = FanForm(instance=fan)
-    context = {'form': form, 'fan': fan}
-    return render(request, 'upd_fan.html', context)
+# def add_fan(request):
+#     if request.method == 'POST':
+#         form = FanForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, "Fan muvaffaqiyatli qo'shildi!")
+#             return redirect('asosiy')
+#     else:
+#         form = FanForm()
+#     context = {'form': form}
+#     return render(request, 'add_fan.html', context)
+
+class add_fan(CreateView):
+    model = Fan
+    template_name = 'add_fan.html'
+    form_class = FanForm
+    success_url = reverse_lazy('asosiy')
+
+# def del_fan(request, fan_id):
+#     fan = get_object_or_404(Fan, id=fan_id)
+#     if request.method == 'POST':
+#         fan.delete()
+#         messages.success(request, f"{fan.nom} fani muvaffaqiyatli o‘chirildi!")
+#         return redirect('asosiy')
+#     return redirect('asosiy')
+
+class del_fan(DeleteView):
+    model = Fan
+    success_url = reverse_lazy('asosiy')
+
+# def upd_fan(request, fan_id):
+#     fan = get_object_or_404(Fan, id=fan_id)
+#     if request.method == 'POST':
+#         form = FanForm(request.POST, instance=fan)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, "Fan muvaffaqiyatli yangilandi!")
+#             return redirect('asosiy')
+#     else:
+#         form = FanForm(instance=fan)
+#     context = {'form': form, 'fan': fan}
+#     return render(request, 'upd_fan.html', context)
+
+class upd_fan(UpdateView):
+    model = Fan
+    form_class = FanForm
+    template_name = 'upd_fan.html'
+    success_url = reverse_lazy('asosiy')
 
 def download_talaba_pdf(request, talaba_id):
     talaba = get_object_or_404(Talaba, id=talaba_id)
@@ -154,7 +185,7 @@ def download_talaba_pdf(request, talaba_id):
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data("https://najottalim.uz/")
     qr.make(fit=True)
-    qr_img = qr.make_image(fill='blue', back_color='red')
+    qr_img = qr.make_image(fill='black', back_color='white')
 
     qr_img.save("qr_code.png")
 
