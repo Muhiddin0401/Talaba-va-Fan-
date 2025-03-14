@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Muhiddin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">MPHTS</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'asosiy' %}"> Bosh sahifa </a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"> Talaba qo'shish </a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"> Fan qo'shish </a></li>
+<!--                    <li class="nav-item"><a class="nav-link" href="#"> Link </a></li>-->
+
+                </ul>
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+  <div class="container mt-4">
+    <div class="row">
+
+      <div class="col-md-3">
+        <ul class="list-group">
+        <li class="list-group-item active" aria-current="true">Fan</li>
+            <li class="list-group-item">
+                <a href="{% url 'Fan_talabasi' fan.pk %}" class="text-decoration-none text-dark">
+                    {{ fan.nom }}
+                </a>
+                <a href="{% url 'upd_fan' fan.id %}" class="btn btn-warning">Tahrirlash</a>
+                <form method="post" action="{% url 'del_fan' fan.id %}" style="display: inline;" onsubmit="return confirm('{{ fan.fan }} fanini o‘chirishni tasdiqlaysizmi?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">O‘chirish</button>
+                </form>
+            </li>
+      </ul>
+      </div>
+
+      <div class="col-md-9">
+            <div class="row">
+                {% for item in Talaba %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <h5 class="card-header">Talaba ma'lumoti:</h5>
+                            <div class="card-body">
+                              <h5 class="card-title">{{item.ism_fam}}</h5>
+                              <p class="card-text">Telefon: {{item.tel_raqam}}</p>
+                              <p class="card-text">Fani: {{item.fan}}</p>
+                               <a href="{% url 'Talaba' item.id %}" class="btn btn-primary">Batafsil</a>
+                               <a href="{% url 'download_talaba_pdf' item.id %}" class="btn btn-success">PDF yuklash</a>
+
+                             </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
