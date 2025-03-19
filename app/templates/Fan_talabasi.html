@@ -49,18 +49,21 @@
 
       <div class="col-md-9">
             <div class="row">
-                {% for item in Talaba %}
+                {% for item in talaba %}
                     <div class="col-md-4 mb-3">
                         <div class="card">
                             <h5 class="card-header">Talaba ma'lumoti:</h5>
                             <div class="card-body">
-                              <h5 class="card-title">{{item.ism_fam}}</h5>
-                              <p class="card-text">Telefon: {{item.tel_raqam}}</p>
-                              <p class="card-text">Fani: {{item.fan}}</p>
-                               <a href="{% url 'Talaba' item.id %}" class="btn btn-primary">Batafsil</a>
-                               <a href="{% url 'download_talaba_pdf' item.id %}" class="btn btn-success">PDF yuklash</a>
-
-                             </div>
+                                {% if item.fayl %}
+                                    <a href="{{ item.fayl.url }}" target="_blank">PDF faylni ko‘rish</a>
+                                {% else %}
+                                    Fayl yuklanmagan
+                                {% endif %}
+                                <h5 class="card-title">{{ item.ism_fam }}</h5>
+                                <p class="card-text">Telefon: {{ item.tel_raqam }}</p>
+                                <a href="{% url 'Talaba' item.id %}" class="btn btn-info">Batafsil</a>
+                                <a href="{% url 'download_talaba_pdf' item.id %}" class="btn btn-success">PDF yuklash</a>
+                            </div>
                         </div>
                     </div>
                 {% endfor %}

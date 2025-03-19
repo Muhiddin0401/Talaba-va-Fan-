@@ -1,19 +1,19 @@
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+from django.contrib.auth import authenticate, login, logout
 from io import BytesIO
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.contrib import messages
 from django.http import HttpResponse
 from .models import *
-from .form import FanForm, TalabaForm
+from .form import FanForm, TalabaForm, UserLoginForm  # forms.py dan to‘g‘ri import
 import qrcode
 from django.db.models import Q
-
+import tempfile
 
 def asosiy(request):
-    query = request.GET.get('q','')
-
+    query = request.GET.get('q', '')
     if query:
         fanlar = Fan.objects.filter(nom__icontains=query)
         talabalar = Talaba.objects.filter(ism_fam__icontains=query)
@@ -28,18 +28,8 @@ def asosiy(request):
 
     return render(request, "Asosiy.html", context)
 
-# class asosiy(ListView):
-#     model = Talaba
-#     template_name = 'Asosiy.html'
-#     context_object_name = 'Talaba'
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['Fan'] = Fan.objects.all()
-#         return context
-
 def Fan_talabasi(request, fan_id):
-    fan = get_object_or_404(Fan, id = fan_id)
+    fan = get_object_or_404(Fan, id=fan_id)
     talabalar = Talaba.objects.filter(fan=fan)
     context = {
         'fan': fan,
@@ -48,36 +38,14 @@ def Fan_talabasi(request, fan_id):
 
     return render(request, "Fan_talabasi.html", context)
 
-# class Fan_talabasi(ListView):
-#     model = Talaba
-#     template_name = 'Fan_talabasi.html'
-#     context_object_name = 'Talaba'
-#
-#     def get_queryset(self):
-#         fan = get_object_or_404(Fan, id = self.kwargs['fan_id'])
-#
-#         return Talaba.objects.filter(fan=fan)
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['fan'] = get_object_or_404(Fan, id = self.kwargs['fan_id'])
-#         context['Fan'] = Fan.objects.all()
-#         return context
-
 def Talaba_haqida(request, talaba_id):
     talaba = get_object_or_404(Talaba, id=talaba_id)
     context = {'talaba': talaba}
     return render(request, "Talaba.html", context)
 
-# class Talaba_haqida(DetailView):
-#     model = Talaba
-#     template_name = 'Talaba.html'
-#     context_object_name = 'talaba'
-#     pk_url_kwarg = "talaba_id"
-
 def add_talaba(request):
     if request.method == 'POST':
-        form = TalabaForm(request.POST)
+        form = TalabaForm(request.POST, request.FILES)  # Fayl yuklash uchun request.FILES qo‘shildi
         if form.is_valid():
             form.save()
             return redirect('asosiy')
@@ -85,12 +53,6 @@ def add_talaba(request):
         form = TalabaForm()
     context = {'form': form}
     return render(request, "add_talaba.html", context)
-
-# class add_talaba(CreateView):
-#     model = Talaba
-#     template_name = 'add_talaba.html'
-#     form_class = TalabaForm
-#     success_url = reverse_lazy('asosiy')
 
 def del_talaba(request, talaba_id):
     talaba = get_object_or_404(Talaba, id=talaba_id)
@@ -100,18 +62,10 @@ def del_talaba(request, talaba_id):
         return redirect('asosiy')
     return redirect('asosiy')
 
-# class del_talaba(DeleteView):
-#     model = Talaba
-#     success_url = reverse_lazy('asosiy')
-#
-#     def delete(self, request, *args, **kwargs):
-#         messages.success(request, "Talaba muvaffaqiyatli o‘chirildi!")  # Xabar qo‘shish
-#         return super().delete(request, *args, **kwargs)
-
 def upd_talaba(request, talaba_id):
     talaba = get_object_or_404(Talaba, id=talaba_id)
     if request.method == 'POST':
-        form = TalabaForm(request.POST, instance=talaba)
+        form = TalabaForm(request.POST, request.FILES, instance=talaba)
         if form.is_valid():
             form.save()
             messages.success(request, f"{talaba.ism_fam} muvaffaqiyatli yangilandi!")
@@ -119,13 +73,7 @@ def upd_talaba(request, talaba_id):
     else:
         form = TalabaForm(instance=talaba)
     context = {'form': form, 'talaba': talaba}
-    return render(request, 'upd_fan.html', context)
-
-# class upd_talaba(UpdateView):
-#     model = Talaba
-#     form_class = TalabaForm
-#     template_name = 'upd_talaba.html'
-#     success_url = reverse_lazy(asosiy)
+    return render(request, 'upd_talaba.html', context)
 
 def add_fan(request):
     if request.method == 'POST':
@@ -139,12 +87,6 @@ def add_fan(request):
     context = {'form': form}
     return render(request, 'add_fan.html', context)
 
-# class add_fan(CreateView):
-#     model = Fan
-#     template_name = 'add_fan.html'
-#     form_class = FanForm
-#     success_url = reverse_lazy('asosiy')
-
 def del_fan(request, fan_id):
     fan = get_object_or_404(Fan, id=fan_id)
     if request.method == 'POST':
@@ -152,10 +94,6 @@ def del_fan(request, fan_id):
         messages.success(request, f"{fan.nom} fani muvaffaqiyatli o‘chirildi!")
         return redirect('asosiy')
     return redirect('asosiy')
-
-# class del_fan(DeleteView):
-#     model = Fan
-#     success_url = reverse_lazy('asosiy')
 
 def upd_fan(request, fan_id):
     fan = get_object_or_404(Fan, id=fan_id)
@@ -169,12 +107,6 @@ def upd_fan(request, fan_id):
         form = FanForm(instance=fan)
     context = {'form': form, 'fan': fan}
     return render(request, 'upd_fan.html', context)
-
-# class upd_fan(UpdateView):
-#     model = Fan
-#     form_class = FanForm
-#     template_name = 'upd_fan.html'
-#     success_url = reverse_lazy('asosiy')
 
 def download_talaba_pdf(request, talaba_id):
     talaba = get_object_or_404(Talaba, id=talaba_id)
@@ -195,11 +127,18 @@ def download_talaba_pdf(request, talaba_id):
     qr.make(fit=True)
     qr_img = qr.make_image(fill='black', back_color='white')
 
-    qr_img.save("qr_code.png")
+    # QR kodni diskka saqlash o‘rniga to‘g‘ridan-to‘g‘ri foydalanish
+    qr_buffer = BytesIO()
+    qr_img.save(qr_buffer, format="PNG")
+    qr_buffer.seek(0)
 
-    p.drawImage("qr_code.png", 400, 650, width=100, height=100)
+    # Temporary fayl yaratish
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_file:
+        temp_file.write(qr_buffer.read())
+        temp_file_path = temp_file.name
 
-    # PDF ni tugatish
+    p.drawImage(temp_file_path, 400, 650, width=100, height=100)
+
     p.showPage()
     p.save()
 
@@ -208,3 +147,37 @@ def download_talaba_pdf(request, talaba_id):
     response['Content-Disposition'] = f'attachment; filename="{talaba.ism_fam}_malumot.pdf"'
     return response
 
+def login_view(request):
+    # Har safar login formasini ko‘rsatish uchun avtomatik yo‘naltirishni o‘chirish
+    if request.method == "POST":
+        form = UserLoginForm(request, data=request.POST)
+        if form.is_valid():
+            phone = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=phone, password=password)
+            if user is not None:
+                login(request, user)
+                if user.is_superuser:
+                    return redirect('admin')
+                else:
+                    return redirect('user')
+            else:
+                messages.error(request, "Telefon raqami yoki parol xato!!!")
+        else:
+            messages.error(request, "Forma ma’lumotlari noto‘g‘ri!")
+    else:
+        form = UserLoginForm()
+        # Agar foydalanuvchi tizimga kirgan bo‘lsa, uni logout qilish yoki login formasini ko‘rsatish
+        if request.user.is_authenticated:
+            logout(request)  # Foydalanuvchini chiqarib yuborish
+
+    return render(request, 'login.html', {'form': form})
+
+def admin_panel(request):
+    return render(request, 'Asosiy.html')  # Yoki Asosiy_panel.html
+
+def staff_panel(request):
+    return render(request, 'add_fan.html')
+
+def user_panel(request):
+    return render(request, 'upd_fan.html')

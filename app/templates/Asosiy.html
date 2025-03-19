@@ -60,6 +60,11 @@
                             <div class="card">
                                 <h5 class="card-header">Talaba ma'lumoti:</h5>
                                 <div class="card-body">
+                                    {% if item.fayl %}
+                                        <a href="{{ item.fayl.url }}" target="_blank">PDF faylni ko‘rish</a>
+                                    {% else %}
+                                        Fayl yuklanmagan
+                                    {% endif %}
                                     <h5 class="card-title">{{ item.ism_fam }}</h5>
                                     <p class="card-text">Telefon: {{ item.tel_raqam }}</p>
                                     <a href="{% url 'Talaba' item.id %}" class="btn btn-info">Batafsil</a>

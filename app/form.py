@@ -1,3 +1,4 @@
+from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from .models import *
 
@@ -5,7 +6,7 @@ class FanForm(forms.ModelForm):
     class Meta:
         model = Fan
         fields = ['nom']
-        widget = {
+        widgets = {
             'nom': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Fan nomini kiriting'}),
         }
 
@@ -21,3 +22,11 @@ class TalabaForm(forms.ModelForm):
             'fan': forms.Select(attrs={'class': 'form-control'}),
             'fayl': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
+
+class UserLoginForm(AuthenticationForm):
+    username = forms.CharField(label='Telefon Raqam', widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Telefon raqamni kiriting'}))
+    password = forms.CharField(label='Parol', widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Parolni kiriting:'}))
+
+    class Meta:
+        model = User
+        fields = ('username', 'password')
